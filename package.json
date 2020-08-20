@@ -1,0 +1,24 @@
+{
+  "name": "YT_Listening",
+  "version": "1.0.0",
+  "description": "Chinese Listening Comprehension on YouTube",
+  "author": "John Chang",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "@nuxtjs/firebase": "^5.2.0",
+    "firebase": "^7.14.5",
+    "fs": "0.0.1-security",
+    "nuxt": "^2.14.1",
+    "opencc": "^1.1.1",
+    "vue-youtube": "^1.4.0"
+  },
+  "devDependencies": {
+    "@nuxtjs/vuetify": "^1.11.2"
+  }
+}
