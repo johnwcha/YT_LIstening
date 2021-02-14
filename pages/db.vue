@@ -67,29 +67,55 @@
         </v-simple-table>
     </v-col>
 
+    <v-row> SRT file to pure text </v-row>
+    <v-row><v-textarea v-model="taSource" label="srt source file" @change="parseSRT"></v-textarea></v-row>
+    <v-row><v-textarea v-model="taTarget"></v-textarea> </v-row>  
+    
+
     </v-container>
 </template>
 
 <script>
 //import ConvertPY from '../pinyin/pinyin'
 import * as firebase from 'firebase/app';
+//import * as admin from "firebase-admin";
 import 'firebase/firestore';
 import { getVideoMeta, getCharIndex, compareValues } from '../util/functions'
 
 export default {
   data() {
     return {
-        delBtn: true,
-        collection: '',
-        videoSub: [],
-        vocabCollection: '',
-        delVocabBtn: true,
-        vocabSub: [],
+      taSource: '',
+      taTarget: '',
+      delBtn: true,
+      collection: '',
+      videoSub: [],
+      vocabCollection: '',
+      delVocabBtn: true,
+      vocabSub: [],
       noviceSkipWords: ['、', '，', '。', '：', '？', '"', ',', '（', '）', '(', ')', '.', '…', ''],
       alphabet: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
     }
   },
   methods: {
+    parseSRT(){
+      const input_lines = this.taSource.split('\n')
+      var temp = []
+      input_lines.forEach((item, index) => {
+        if ((index % 4) === 0) {
+          console.log(item) // line number
+        } else if ((index % 4) === 1) {  
+            console.log(item, index) // timecode format 00:01:36,000 --> 00:01:37,536
+            //timecode_str = item;
+        } else if ((index % 4) === 2) {  
+            //console.log(item.split('", "').join(' ').trim()) // subtitle to parse
+            temp.push(item)
+        } else if ((index % 4) === 3) {  
+            console.log(item) // blank line
+        } 
+      })
+      this.taTarget = temp.join('\n')
+    },
       deleteSentence(item) {
           console.log(this.collection, item)
           this.$fireStore.collection(this.collection).doc(item.id).delete().then(() => {
@@ -133,14 +159,14 @@ export default {
         //         console.log(char)
         //         if (!this.noviceSkipWords.includes(char)) {
         //             // ******* WRITE ******** 汉字 
-        //             this.$fireStore.collection('-vocab_index').doc(char).update({
+        //             this.$fireStore.collection('-char_index').doc(char).update({
         //                 vocab: firebase.firestore.FieldValue.arrayUnion(phrase)
         //             }).then(() => { console.log('updated field'); character_write = character_write +2;
         //                 console.log('character write count:', character_write) }).catch(error => {
         //                 //console.log(error.message)
         //                 console.log( char, phrase)
         //                 character_write = character_write +2
-        //                 this.$fireStore.collection('-vocab_index').doc(char).set({vocab: [phrase]})
+        //                 this.$fireStore.collection('-char_index').doc(char).set({vocab: [phrase]})
         //                     .then(() =>{
         //                         console.log('insert data')
         //                         character_write++
@@ -183,21 +209,25 @@ export default {
               console.log( vocab )
               //batch.update(this.$fireStore.collection( this.collection ).doc(item.id), {sub: item.sub})
           })
-          // update -vocab_index
+          // update -char_index
           this.indexVocab(item.sub)
       },
       doDelete() {
           // delete entire collection // will have to delete each document
-          const batch = this.$fireStore.batch()
+          // const batch = this.$fireStore.batch() // 500 max
+          var count = 0
           this.videoSub.forEach(doc => {
-              batch.delete( this.$fireStore.collection(this.collection).doc(doc.id))
+              count++
+              this.$fireStore.collection(this.collection).doc(doc.id).delete().then(() => {
+                console.log('delete ', count)
+              }).catch(error => { console.log(error) })
           })
-          batch.commit().then(() => {
-              console.log('batch delete success')
-              this.videoSub = []
-          }).catch(error => {
-              console.log( error )
-          })
+          // batch.commit().then(() => {
+          //     console.log('batch delete success')
+          //     this.videoSub = []
+          // }).catch(error => {
+          //     console.log( error )
+          // })
       },
       getDocs() {
           this.videoSub = []
@@ -213,7 +243,7 @@ export default {
           }).catch(error => { console.log(error) })
       },
       indexVocab(sentence) {
-        // update -vocab_index
+        // update -char_index
         // const sentence (sentence with space delimited word segmentation)
         const vocab_arr = sentence.split(' ')
         //console.log( this.$fireStore)
@@ -222,12 +252,12 @@ export default {
             const tmp = vocab.split('')
             tmp.forEach(char => {
                 console.log(char, vocab)
-                this.$fireStore.collection('-vocab_index').doc(char).update({
+                this.$fireStore.collection('-char_index').doc(char).update({
                     vocab: firebase.firestore.FieldValue.arrayUnion(vocab)
                 }).then(() => { console.log('updated field') }).catch(error => {
                     //console.log(error.message)
                     console.log( char, vocab)
-                    this.$fireStore.collection('-vocab_index').doc(char).set({vocab: [vocab]})
+                    this.$fireStore.collection('-char_index').doc(char).set({vocab: [vocab]})
                         .then(() =>{
                             console.log('insert data')
                         }).catch(error => { console.log(error) })
@@ -237,8 +267,16 @@ export default {
       }
   },
   mounted() {
-      //console.log( getVideoMeta(this.$fireStore) )
-      //console.log( getCharIndex() )
+
+    //console.log( getVideoMeta(this.$fireStore) )
+    //console.log( getCharIndex() )
+    // const db = admin.firestore();
+
+    // db.listCollections().then(snapshot=>{
+    //     snapshot.forEach(snaps=>{
+    //         console.log(snaps["_queryOptions"].collectionId);  // GET LIST OF ALL COLLECTIONS
+    //     })
+    // }).catch(error=>console.log(error));  
   }
 }
 

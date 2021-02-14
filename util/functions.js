@@ -1,3 +1,6 @@
+// Firebase batch delete collections 
+// firebase firestore:delete --all-collections -y
+
 import firebase from 'firebase/app';
 import 'firebase/firestore'
 
@@ -67,7 +70,7 @@ export function parseSRT(file) {
         }        
     } else if ((index % 4) === 2) {  
         //console.log(item.split('", "').join(' ').trim()) // subtitle to parse
-        if (item.split('", "').length==1) alert('word segmentation !!!', item)
+        if (item.split('", "').length==1) console.log('word segmentation !!!', item)
         const sub = item.split('", "').join(' ').trim()
         //console.log( {id: vid, obj: {start: startTime, duration: duration, sub: sub}} )
         videoCollection.push({id: vid, start: startTime, duration: duration, sub: sub})

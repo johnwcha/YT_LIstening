@@ -18,12 +18,14 @@
       <v-btn icon @click.stop="miniVariant = !miniVariant" >
         <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
       </v-btn>
+      <!--
       <v-btn icon @click.stop="clipped = !clipped" >
         <v-icon>mdi-application</v-icon>
       </v-btn>
       <v-btn icon @click.stop="fixed = !fixed" >
         <v-icon>mdi-minus</v-icon>
       </v-btn>
+      -->
       <v-toolbar-title v-text="title" />
     <v-spacer />
       <v-btn icon @click.stop="rightDrawer = !rightDrawer" >
@@ -76,45 +78,40 @@ export default {
           to: '/'
         },
         {
-          icon: 'mdi-label-variant',
-          title: 'Speech (HSK level 1)',
-          to: '/speech_1'
-        },
-        {
-          icon: 'mdi-label-variant-outline',
-          title: 'Speech (HSK level 2)',
-          to: '/speech_2'
-        },
-        {
-          icon: 'mdi-label-variant',
-          title: 'Music (HSK level 1)',
-          to: '/music_1'
-        },
-        {
-          icon: 'mdi-label-variant-outline',
-          title: 'Music (HSK level 2)',
-          to: '/music_2'
+          icon: 'mdi-playlist-music',
+          title: 'Indexing (music)',
+          to: '/music'
         },
         {
           icon: 'mdi-chart-bubble',
-          title: 'Indexing (speech)',
+          title: 'textbook',
           to: '/inspire'
         },
         {
-          icon: 'mdi-chart-bubble',
+          icon: 'mdi-closed-caption',
           title: 'Indexing SRT files',
           to: '/srt'
         },
         {
-          icon: 'mdi-chart-bubble',
+          icon: 'mdi-pencil',
           title: 'Authoring Content',
           to: '/authoring'
         },
         {
-          icon: 'mdi-playlist-music',
-          title: 'Indexing (music)',
-          to: '/music'
-        }
+          icon: 'mdi-chart-box',
+          title: 'Database Manage',
+          to: '/db'
+        },
+        {
+          icon: 'mdi-playlist-check',
+          title: 'Grammar Tag',
+          to: '/grammar'
+        },
+        {
+          icon: 'mdi-list-status',
+          title: 'Activity Tracking',
+          to: '/tracking'
+        },
       ],
       miniVariant: false,
       right: true,

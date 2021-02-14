@@ -1,10 +1,5 @@
 <template>
   <div>
-    <v-flex class="text-center">
-      <blockquote class="blockquote">
-        &#8220;Indexing Subtitle texts. File format: <span class="display-1"> SRT </span> (subtitles) &#8221;
-      </blockquote>
-    </v-flex>
 
     <v-row id="content">
       <v-col cols="6" id="left">
@@ -17,33 +12,28 @@
           <v-text-field solo v-model="vidTitle" label="video title (vidTitle)" ></v-text-field>
           </v-col>
           <v-col cols="12">
-            <p> 1) 分词 at <a href="http://cppjieba-webdemo.herokuapp.com/"> http://cppjieba-webdemo.herokuapp.com/ </a></p>
-            <p> 2) sample input formate: <br>
-                  <span class="red--text"> 1 </span><br>
-                  <span class="red--text"> 00:00:04,352 --> 00:00:09,216 </span><br>
-                  <span class="red--text"> ", "看着", "明媚", "的", "阳光", "怡人", "的", "景色", " </span></p>
+            <p> 分词 at <a href="http://cppjieba-webdemo.herokuapp.com/"> http://cppjieba-webdemo.herokuapp.com/ </a></p>
             <v-textarea name="input-7-1" outlined
               label="paste parsed output here"
               v-model="taValue"
             ></v-textarea>
             <v-row>
-              <v-col cols="6">
+              <v-col cols="4">
                 <v-text-field solo v-model="genre" label="video (genre)"> </v-text-field>
               </v-col>
-              <v-col cols="6">
+              <v-col cols="4">
                 <v-text-field solo v-model="level" label="proficiency (level)"> </v-text-field>
               </v-col>
+              <v-col cols="4">
+                <v-text-field solo v-model="cctype" label="CC none eng hard soft"> </v-text-field>
+              </v-col>
             </v-row>
-            <v-text-field solo v-model="exclude" label="exclude item (delimiter: space)"> </v-text-field>
             <span class="blue--text"> GENRES: 
-              <v-btn outlined color="indigo" @click="setGenre('animation/cartoon')"> animation/cartoon </v-btn>
-              <v-btn outlined color="indigo" @click="setGenre('documentary')"> documentary</v-btn>
-              <v-btn outlined color="indigo" @click="setGenre('drama')"> drama</v-btn> 
-              <v-btn outlined color="indigo" @click="setGenre('info/educational/how-to')"> info/educational/how-to</v-btn>
-              <v-btn outlined color="indigo" @click="setGenre('interview')"> interview</v-btn> 
-              <v-btn outlined color="indigo" @click="setGenre('products')"> products</v-btn> 
-              <v-btn outlined color="indigo" @click="setGenre('talkshow')"> talkshow</v-btn> 
-              <v-btn outlined color="indigo" @click="setGenre('vlogs')"> vlogs</v-btn></span>
+              <v-btn outlined color="indigo" @click="setGenre('動畫 🧚')"> 動畫 </v-btn>
+              <v-btn outlined color="indigo" @click="setGenre('記錄 🎞')"> 記錄 </v-btn>
+              <v-btn outlined color="indigo" @click="setGenre('劇情 💕')"> 劇情 </v-btn> 
+              <v-btn outlined color="indigo" @click="setGenre('單口 🙎‍♂️🙍')"> 單口 </v-btn> 
+            </span>
             <span class="blue--text"> Proficiency: 
               <v-btn outlined color="indigo" @click="setLevel('novice')"> 初级 </v-btn>
               <v-btn outlined color="indigo" @click="setLevel('intermediate')"> 中级</v-btn>
@@ -58,7 +48,7 @@
       </v-col>
       <v-col>
         <v-card outlined>
-          <v-virtual-scroll :items="videoCollection" :item-height="50" height="860" >
+          <v-virtual-scroll :items="videoCollection" :item-height="80" height="860" >
             <template v-slot="{ item, index }">
               <v-list-item :link="true">
 
@@ -79,26 +69,6 @@
               </v-list-item>
             </template>
           </v-virtual-scroll></v-card>
-      <!--
-      <v-col cols="6" id="right">
-        <v-container id="scroll-target" style="max-height: 880px" class="overflow-y-auto">
-        <v-row v-scroll:#scroll-target="onScroll" style="height: 1000px">
-        <v-simple-table >
-          <template v-slot:default>
-            <thead>
-              <tr>
-                <th class="text-left"> Time </th>
-                <th class="text-left"> Subtitle </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(item, i) in videoCollection" :key="i">
-                <td style="font-weight: bold"> <v-text-field @change="adjustTime(item, i)" v-model="item.id"> </v-text-field> </td>
-                <td style="font-size:18px" @click="playSegment(item)"> {{ item.sub }} </td>
-              </tr>
-            </tbody>
-          </template>
-        </v-simple-table> </v-row> </v-container> -->
       </v-col>
     </v-row>
 
@@ -117,13 +87,14 @@ Vue.use(VueYoutube)
 export default {
   data() {
     return {
+      cctype: '',
       exclude: '',
       vidTitle: '',
       level: '',
       skipWords: [],
-      advSkipWords: ['你', '我', '他', '她', '是', '有', '的', '一', '个', '不', '了','、', '，', '。', '：', '？', '"', ',', '（', '）', '(', ')'],
-      noviceSkipWords: ['、', '，', '。', '：', '？', '"', ',', '（', '）', '(', ')', '.', '…', ''],
-      alphabet: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+      advSkipWords: ['和', '嗎', '你', '我', '他', '她', '的', '了','、', '，', '。', '：', '？', '"', ',', '（', '）', '(', ')'],
+      noviceSkipWords: ['、', '，', '。', '：', '？', '"', ',', '（', '）', '(', ')', '.', '…', '','‘','’', '“', '”'],
+      alphabet: ['“','”','哦','喲','呢','啊','呀','呐','唉','哎','！','1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
       videoCollection: [],
       videoDuration: null,
       videoId: '',
@@ -197,7 +168,8 @@ export default {
       this.videoCollection = parseSRT(this.taValue)
     },
     n_save() {
-      this.parse_n_save()
+      console.log(this.videoCollection)
+      //this.parse_n_save()
     },
     parse_n_save() {
       //const sentence_batch = this.$fireStore.batch() 
@@ -206,12 +178,17 @@ export default {
       let sentence_write = 0
       let phrase_write = 0
       let character_write = 0
-
+      let levelSkip = []
+      if (this.level == 'novice') { 
+        levelSkip = this.noviceSkipWords.concat(this.alphabet)
+      } else {
+        levelSkip = this.advSkipWords.concat(this.alphabet)
+      }
         this.videoCollection.forEach(item => {
           //console.log(item) // {id: vid, start: startTime, duration: duration, sub: sub}
           console.log(item.sub)
-          const obj = {start: item.start, duration: item.duration, sub: item.sub}
-          // ******* WRITE ********  sentence_
+          const obj = {start: item.start, sub: item.sub}
+          //                                                                            ******* WRITE ********  sentence_
           this.$fireStore.collection( this.videoId ).doc(item.id).set(obj).then(() => {
               sentence_write++
               console.log('】sentence write count:', sentence_write)
@@ -219,11 +196,11 @@ export default {
             // write phrase
             item.sub.split(' ').forEach(phrase => {
                 console.log(phrase)
-                const skip = this.noviceSkipWords.concat(this.alphabet)
+                const skip = this.advSkipWords.concat(this.alphabet) // also exclude 我 有 的 你 他 ...
                 if (!skip.includes(phrase)) {
                     var obj = {}
-                    obj[item.id] = {duration: item.duration, start: item.start, sub: item.sub}
-                    // ******* WRITE ******** phrase 
+                    obj[item.id] = {start: item.start, sub: item.sub}
+                    //                                                                  ******* WRITE ******** phrase 
                     this.$fireStore.collection(phrase).doc(this.videoId).set(obj, { merge: true }).then(() => {
                         phrase_write++
                         console.log('phrase write count:', phrase_write)
@@ -231,6 +208,7 @@ export default {
                 }
                 //phrase_batch.set(this.$fireStore.collection(phrase).doc(this.videoId), obj, { merge: true })
                 // batch write character
+
                 const chars = phrase.split('')
                 chars.forEach(char => {
                     console.log(char)
@@ -238,22 +216,31 @@ export default {
                     //var updateObj = {}
                     //updateObj[item.id] = oneSentence
                     //console.log(updateObj)
-                    if (!this.noviceSkipWords.includes(char)) {
-                        // ******* WRITE ******** 汉字 
-                        this.$fireStore.collection('-vocab_index').doc(char).update({
+                    /*
+                      TO BE REVISED: first set() an empty array
+                      then update() arrayUnion
+                    */
+                    if (char != ' ') { 
+                    if (!levelSkip.includes(char)) {
+                        //                                                             ******* WRITE ******** 汉字 
+                        this.$fireStore.collection('-char_index').doc(char).update({ // 1) try 'update' first
                             vocab: firebase.firestore.FieldValue.arrayUnion(phrase)
                         }).then(() => { console.log('updated field'); character_write = character_write +2;
                            console.log('character write count:', character_write) }).catch(error => {
-                            //console.log(error.message)
+                            // 2) if error, No document to update, so set() the doc
                             console.log( char, phrase)
                             character_write = character_write +2
-                            this.$fireStore.collection('-vocab_index').doc(char).set({vocab: [phrase]})
-                                .then(() =>{
-                                    console.log('insert data')
-                                    character_write++
-                                    console.log('character write count:', character_write)
-                                }).catch(error => { console.log(error) })
+                            this.$fireStore.collection('-char_index').doc(char).set({vocab: []}).then(() =>{
+                                this.$fireStore.collection('-char_index').doc(char).update({ // 3) after set [], then 'update'
+                                  vocab: firebase.firestore.FieldValue.arrayUnion(phrase)
+                                }).then(() => { 
+                                  console.log('insert data')
+                                  character_write++
+                                  console.log('character write count:', character_write)
+                                }).catch(error => { console.log(error.message) })
+                              }).catch(error => { console.log(error.message) })
                         })
+                    }
                     }
                 })
             })
@@ -277,7 +264,7 @@ export default {
 
         // save video metadata
         this.$fireStore.collection( '-video_meta' ).doc(this.videoId)
-            .set( {genre: this.genre, level: this.level, title: this.vidTitle} )
+            .set( {genre: this.genre, level: this.level, title: this.vidTitle, cc: this.cctype, active: true} )
             .then(() => { console.log('video meta-data save complete 😀😀😀😀😀') })
             .catch((error) => { console.error(error.message) } )
         /*
